@@ -1,0 +1,14 @@
+dataset:
+  name: /绝对路径/你的/datasets/wzry_unsupervised.hdf5  # 指向你的HDF5
+  num_steps: ${eval:'${wm.num_preds} + ${wm.history_size}'}
+  frameskip: 5
+  name: pusht_expert_train
+  keys_to_load:
+    - pixels
+    # - action
+    - proprio
+    - state
+  keys_to_cache:
+    # - action
+    - proprio
+    - state

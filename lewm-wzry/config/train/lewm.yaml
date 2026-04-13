@@ -1,0 +1,89 @@
+
+
+# ====== 2. Wandb 监控修改 ======
+# wandb:
+#   enabled: True  # 强烈建议保持True，Loss全靠它看
+#   config:
+#     # entity: null   # 改成你的 wandb 账号名，或者注释掉
+#     project: wzry_jepa  # 项目名
+
+# ====== 3. 模型参数确认 ======
+# wm:
+#   type: lewm
+#   history_size: 3  # 用前3帧
+#   num_preds: 1     # 预测未来1帧
+#   # 注: 你的代码里 action_dim 需要定义一下，因为无监督时我们要猜 Z
+#   action_dim: 16   # 【新增】定义潜在动作 Z 的维度
+
+
+defaults:
+  - _self_
+  - data: wzry
+
+# ====== 1. 基础配置修改 ======
+unsupervised: True  # 【新增】告诉代码我们现在是在做纯视频预训练
+
+
+output_model_name: lewm
+subdir: ${hydra:job.id}
+
+num_workers: 6
+train_split: 0.9
+seed: 3072
+img_size: 224
+patch_size: 14
+encoder_scale: tiny
+dump_object: True
+
+trainer:
+  max_epochs: 100
+  devices: auto
+  accelerator: gpu
+  precision: bf16
+  gradient_clip_val: 1.0
+
+loader:
+  # batch_size: 128
+  batch_size: 32
+  num_workers: ${num_workers}
+  persistent_workers: True
+  prefetch_factor: 3
+  pin_memory: True
+
+optimizer:
+  type: AdamW
+  lr: 5e-5
+  weight_decay: 1e-3
+
+wandb:
+  # enabled: True
+  enabled: False
+  config:
+    entity: lewm
+    project: lewm
+    name: ${output_model_name}
+    id: ${subdir}
+    resume: allow
+    log_model: False
+
+wm:
+  type: lewm
+  history_size: 3
+  num_preds: 1
+  # embed_dim: 192
+  embed_dim: 16
+
+predictor:
+  depth: 6
+  heads: 16
+  mlp_dim: 2048
+  dim_head: 64
+  dropout: 0.1
+  emb_dropout: 0.0
+
+loss:
+  sigreg:
+    weight: 0.09
+    kwargs:
+      knots: 17
+      num_proj: 1024

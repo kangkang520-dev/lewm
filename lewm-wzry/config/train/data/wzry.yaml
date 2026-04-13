@@ -1,0 +1,9 @@
+# 文件路径: config/train/data/wzry.yaml
+dataset:
+  # 使用动态获取当前项目绝对路径的方法
+  name: ${hydra:runtime.cwd}/datasets/wzry_unsupervised.hdf5
+  num_steps: ${eval:'${wm.num_preds} + ${wm.history_size}'}
+  frameskip: 1  # 视频连续帧，王者荣耀动作快，建议设为1或2
+  keys_to_load:
+    - pixels
+  keys_to_cache: []
